@@ -4,6 +4,10 @@
 
 #include "TFT.h"
 
+#define TFT_HEIGHT 240
+#define TFT_WIDTH 320
+#define TFT_PADDING 4
+
 class Mixolotron_TFT : public TFT {
 	
 public:
