@@ -47,11 +47,15 @@ int getKey(){
 	
 
 	if(row != -1 && column != -1){
+		#if defined(DEBUGALLSERIAL) || defined(DEBUG)
 		Serial.println(String(F("pressed: row=")) + String(row) + String(F(", col=")) + String(column));
+		#endif
 		return (row ) * 4 + (column + 0);
 	}
 	else {
+		#if !defined(NOSERIAL) && defined(DEBUGALLSERIAL) || defined(DEBUG)
 		Serial.println(String(F("nothing pressed")));
+		#endif
 		return -1;
 	}
 }
