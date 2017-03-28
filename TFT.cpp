@@ -278,8 +278,7 @@ void TFT::setPixel(unsigned int poX, unsigned int poY,unsigned int color){
     sendData(color);
 }
 
-void TFT::drawCircle(int poX, int poY, int r,unsigned int color)
-{
+void TFT::drawCircle(int poX, int poY, int r,unsigned int color){
     int x = -r, y = 0, err = 2-2*r, e2; 
     do {
         setPixel(poX-x, poY+y,color); 
@@ -295,8 +294,7 @@ void TFT::drawCircle(int poX, int poY, int r,unsigned int color)
     } while (x <= 0);
 }
 
-void TFT::fillCircle(int poX, int poY, int r,unsigned int color)
-{
+void TFT::fillCircle(int poX, int poY, int r,unsigned int color){
     int x = -r, y = 0, err = 2-2*r, e2;
     do {
 
@@ -314,8 +312,7 @@ void TFT::fillCircle(int poX, int poY, int r,unsigned int color)
 }
 
 
-void TFT::drawLine(unsigned int x0,unsigned int y0,unsigned int x1,unsigned int y1,unsigned int color)
-{
+void TFT::drawLine(unsigned int x0,unsigned int y0,unsigned int x1,unsigned int y1,unsigned int color){
     int x = x1-x0;
     int y = y1-y0;
     int dx = abs(x), sx = x0<x1 ? 1 : -1;
@@ -336,38 +333,31 @@ void TFT::drawLine(unsigned int x0,unsigned int y0,unsigned int x1,unsigned int 
 }
 
 
-void TFT::drawVerticalLine(unsigned int poX, unsigned int poY,unsigned int length,unsigned int color)
-{
+void TFT::drawVerticalLine(unsigned int poX, unsigned int poY,unsigned int length,unsigned int color){
     setXY(poX,poY);
     setOrientation(1);
-    if(length+poY>MAX_Y)
-    {
+    if(length+poY>MAX_Y){
         length=MAX_Y-poY;
     }
 
-    for(unsigned int i=0;i<length;i++)
-    {
+    for(unsigned int i=0;i<length;i++){
         sendData(color);
     }
 }
 
-void  TFT::drawHorizontalLine(unsigned int poX, unsigned int poY,unsigned int length,unsigned int color)
-{
+void  TFT::drawHorizontalLine(unsigned int poX, unsigned int poY,unsigned int length,unsigned int color){
     setXY(poX,poY);
     setOrientation(0);
-    if(length+poX>MAX_X)
-    {
+    if(length+poX>MAX_X){
         length=MAX_X-poX;
     }
-    for(unsigned int i=0;i<length;i++)
-    {
+    for(unsigned int i=0;i<length;i++){
         sendData(color);
     }
 }
 
 
-void TFT::drawRectangle(unsigned int poX, unsigned int poY, unsigned int length,unsigned int width,unsigned int color)
-{
+void TFT::drawRectangle(unsigned int poX, unsigned int poY, unsigned int length,unsigned int width,unsigned int color){
     drawHorizontalLine(poX, poY, length, color);
     drawHorizontalLine(poX, poY+width, length, color);
 
@@ -375,10 +365,8 @@ void TFT::drawRectangle(unsigned int poX, unsigned int poY, unsigned int length,
     drawVerticalLine(poX + length, poY, width,color);
 }
 
-void TFT::fillRectangle(unsigned int poX, unsigned int poY, unsigned int length, unsigned int width, unsigned int color)
-{
-    for(unsigned int i=0;i<width;i++)
-    {
+void TFT::fillRectangle(unsigned int poX, unsigned int poY, unsigned int length, unsigned int width, unsigned int color){
+    for(unsigned int i=0;i<width;i++){
         if(DisplayDirect == LEFT2RIGHT)
           drawHorizontalLine(poX, poY+i, length, color);
           else if (DisplayDirect ==  DOWN2UP)
@@ -391,13 +379,11 @@ void TFT::fillRectangle(unsigned int poX, unsigned int poY, unsigned int length,
     }
 }
 
-void TFT::drawChar(unsigned char ascii,unsigned int poX, unsigned int poY,unsigned int size, unsigned int fgcolor)
-{
+void TFT::drawChar(unsigned char ascii,unsigned int poX, unsigned int poY,unsigned int size, unsigned int fgcolor){
     
     setXY(poX,poY);
     
-    if((ascii < 0x20)||(ascii > 0x7e))//Unsupported char.
-    {
+    if((ascii < 0x20)||(ascii > 0x7e)){	// unsupported
         ascii = '?';
     }
     for(unsigned char i=0;i<8;i++)
@@ -421,51 +407,36 @@ void TFT::drawChar(unsigned char ascii,unsigned int poX, unsigned int poY,unsign
     }
 }
 
-void TFT::drawString(char *string,unsigned int poX, unsigned int poY,unsigned int size,unsigned int fgcolor)
-{
-    while(*string)
-    {
-        for(unsigned char i=0;i<8;i++)
-        {
+void TFT::drawString(char *string,unsigned int poX, unsigned int poY,unsigned int size,unsigned int fgcolor){
+    while(*string){
+        for(unsigned char i=0;i<8;i++){
             drawChar(*string, poX, poY, size, fgcolor);
         }
-        *string++;
-        if(DisplayDirect == LEFT2RIGHT)
-        {
-          if(poX < MAX_X)
-          {
-              poX+=8*size; // Move cursor right
-          }
+		*string++;
+		if(DisplayDirect == LEFT2RIGHT){
+			if(poX < MAX_X){
+				poX+=8*size; // Move cursor right
+			}
+		}
+		else if(DisplayDirect == DOWN2UP){
+			if(poY > 0){
+				poY-=8*size; // Move cursor right
+			}
+		}
+		else if(DisplayDirect == RIGHT2LEFT){
+			if(poX > 0){
+			  poX-=8*size; // Move cursor right
+			}
         }
-          else if(DisplayDirect == DOWN2UP)
-          {
-            if(poY > 0)
-            {
-                poY-=8*size; // Move cursor right
-            }
-          }
-          else if(DisplayDirect == RIGHT2LEFT)
-        {
-          if(poX > 0)
-          {
-              poX-=8*size; // Move cursor right
-          }
-        }
-          else if(DisplayDirect == UP2DOWN)
-          {
-            if(poY < MAX_Y)
-            {
-                poY+=8*size; // Move cursor right
-            }
-          }
-          
-          
-
+		else if(DisplayDirect == UP2DOWN){
+			if(poY < MAX_Y){
+				poY+=8*size; // Move cursor right
+			}
+		}      
     }
 }
 
-void TFT::all_pin_input(void)
-{
+void TFT::all_pin_input(void){
 #ifdef SEEEDUINO
     DDRD &=~ 0xfc;
     DDRB &=~ 0x03;
