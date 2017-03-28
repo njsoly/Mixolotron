@@ -239,8 +239,7 @@ void TFT::paintScreenBlack(void){
     }
 }
 
-void TFT::exitStandBy(void)
-{
+void TFT::exitStandBy(void){
     sendCommand(0x0010);
     sendData(0x14E0);
     delay(100);
