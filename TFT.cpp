@@ -336,8 +336,7 @@ void TFT::drawLine(unsigned int x0,unsigned int y0,unsigned int x1,unsigned int 
 }
 
 
-void TFT::drawVerticalLine(unsigned int poX, unsigned int poY,unsigned int length,unsigned int color)
-{
+void TFT::drawVerticalLine(unsigned int poX, unsigned int poY,unsigned int length,unsigned int color){
     setXY(poX,poY);
     setOrientation(1);
     if(length+poY>MAX_Y)
