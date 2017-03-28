@@ -147,8 +147,7 @@
 
 extern unsigned char simpleFont[][8];
 
-class TFT
-{
+class TFT {
 public:
 
     void init (void);
