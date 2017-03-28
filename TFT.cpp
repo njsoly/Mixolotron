@@ -49,8 +49,7 @@ void TFT::pushData(unsigned char data)
 #endif
 }
 
-unsigned char TFT::getData(void)
-{
+unsigned char TFT::getData(void){
     unsigned char data=0;
     delay(1);
     data |= ((PIND&0xfc)>>2);
@@ -58,8 +57,7 @@ unsigned char TFT::getData(void)
     return data;
 }
 
-void TFT::sendCommand(unsigned int index)
-{
+void TFT::sendCommand(unsigned int index){
     CS_LOW;
     RS_LOW;
     RD_HIGH;
@@ -75,8 +73,7 @@ void TFT::sendCommand(unsigned int index)
     CS_HIGH;
 }
 
-void TFT::sendData(unsigned int data)
-{
+void TFT::sendData(unsigned int data){
     CS_LOW;
     RS_HIGH;
     RD_HIGH;
@@ -233,10 +230,8 @@ void  TFT::init (void)
     paintScreenBlack();
 }
 
-void TFT::paintScreenBlack(void)
-{
-    for(unsigned char i=0;i<2;i++)
-    {
+void TFT::paintScreenBlack(void){
+    for(unsigned char i=0;i<2;i++)   {
         for(unsigned int f=0;f<38400;f++)
         {
             sendData(BLACK);
@@ -267,13 +262,11 @@ void TFT::setOrientation(unsigned int HV)//horizontal or vertical
     sendCommand(0x0022); //Start to write to display RAM
 }
 
-void TFT::setDisplayDirect(unsigned char Direction) 
-{
+void TFT::setDisplayDirect(unsigned char Direction) {
   DisplayDirect = Direction;
 }
 
-void TFT::setXY(unsigned int poX, unsigned int poY)
-{
+void TFT::setXY(unsigned int poX, unsigned int poY){
     sendCommand(0x0020);//X
     sendData(poX);
     sendCommand(0x0021);//Y
@@ -281,8 +274,7 @@ void TFT::setXY(unsigned int poX, unsigned int poY)
     sendCommand(0x0022);//Start to write to display RAM
 }
 
-void TFT::setPixel(unsigned int poX, unsigned int poY,unsigned int color)
-{
+void TFT::setPixel(unsigned int poX, unsigned int poY,unsigned int color){
     setXY(poX,poY);
     sendData(color);
 }
