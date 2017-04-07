@@ -14,6 +14,8 @@
 unsigned char rows[]{ROW_PINS};
 unsigned char cols[]{COLUMN_PINS};
 
+unsigned int lastPress = 0;
+unsigned int minimumPressInterval = 500;
 
 int getKey(){
 
@@ -50,7 +52,13 @@ int getKey(){
 		#if (defined(DEBUGALLSERIAL) || defined(DEBUG)) && !defined(NOSERIAL)
 		Serial.println(String(F("pressed: row=")) + String(row) + String(F(", col=")) + String(column));
 		#endif
-		return (row ) * 4 + (column + 0);
+		if(millis() - lastPress >= minimumPressInterval){
+			lastPress = millis();
+			return (row ) * 4 + (column + 0);
+		}
+		else { // new keypress is too soon, return -1 as if no button pressed.
+			return -1;
+		}
 	}
 	else {
 		#if (defined(DEBUGALLSERIAL) || defined(DEBUG)) && !defined(NOSERIAL)
@@ -61,5 +69,35 @@ int getKey(){
 }
 
 
+char getKeyChar(){
+	int keyCode = getKey();
+	if(keyCode == -1){
+		return -1;
+	}
+	else if (keyCode >= 0 && keyCode <= 15){
+		switch(keyCode){
+			case 0:
+			return '1'; break;
+			case 1:
+			return '2'; break;
+			case 2: return '3'; break;
+			case 3: return 'A'; break;
+			case 4: return '4'; break;
+			case 5: return '5'; break;
+			case 6: return '6'; break;
+			case 7: return 'B'; break;
+			case 8: return '7'; break;
+			case 9: return '8'; break;
+			case 10: return '9'; break;
+			case 11: return 'C'; break;
+			case 12: return '*'; break;
+			case 13: return '0'; break;
+			case 14: return '#'; break;
+			case 15: return 'D'; break;
+			default: return -1;
+		}
+	}
+	else return -1;
+}
 
 #endif // MIXOLOTRON_KEYPAD_H_
