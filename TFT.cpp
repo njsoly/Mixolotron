@@ -26,6 +26,12 @@
     Add more conditional statements in funtions,fillRectangle,drawChar,drawString 
     to deal with different directions displaying.
 */
+/*
+  Modified record:
+  2017-02-20 by Nate Solyntjes
+	for inclusion by Mixolotron project, as a dependency of 
+	Mixolotron_TFT.h & .cpp.
+*/
 #include "TFT.h" 
 
 void TFT::pushData(unsigned char data)

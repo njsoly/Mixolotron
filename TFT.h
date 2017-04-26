@@ -24,6 +24,12 @@
     2012.3.27 by Frankie.Chu
     Add the macro definitions,public funtion and private variable for the char display direction.
 */
+/*
+  Modified record: 
+  2017-02-20 by Nate Solyntjes
+  change board-specifying define to be #MEGA, other changes to work with 
+  the mixolotron project.
+*/
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 

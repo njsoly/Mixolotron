@@ -10,7 +10,13 @@
 #include "Mixolotron_TFT.h"
 #include "Mixolotron_keypad.h"
 #include "Mixolotron_serial.h"
+#include "Mixolotron_RTC.h"
 
+class Mixolotron {
+	
+	
+	
+};
 
 
 
