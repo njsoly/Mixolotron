@@ -12,6 +12,9 @@ public:
 	Mixolotron_serial(unsigned int baud=SERIAL_BAUD){
 		this->baudRate = baud;
 	}
+	void init(){
+		Serial.begin(SERIAL_BAUD);
+	}
 	
 protected:
 	unsigned int baudRate;

@@ -1,4 +1,5 @@
 #include "RTClib.h"
+#include <Wire.h>
 
 #ifndef MIXOLOTRON_RTC_H_
 #define MIXOLOTRON_RTC_H_
