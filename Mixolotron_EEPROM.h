@@ -3,7 +3,6 @@
 #define MIXOLOTRON_EEPROM_H_
 
 #include <Arduino.h>
-#include <EEPROM.h>
 
 #define CURRENT_DATE_ADDRESS 600
 

@@ -3,6 +3,7 @@
  
 
 #include "TFT.h"
+#include <Arduino.h>
 
 #define TFT_HEIGHT 240
 #define TFT_WIDTH 320

@@ -17,7 +17,11 @@ class Mixolotron_keypad {
 	public:
 	unsigned int lastPress = 0;
 	unsigned int minimumPressInterval = 300;
-
+	
+	int timeSinceLastPress(){
+		return millis() - lastPress;
+	}
+	
 	int getKey(){
 
 		int row = -1, column = -1;
@@ -50,10 +54,10 @@ class Mixolotron_keypad {
 		
 
 		if(row != -1 && column != -1){
+			if(millis() - lastPress >= minimumPressInterval){
 			#if (defined(DEBUGALLSERIAL) || defined(DEBUG)) && !defined(NOSERIAL)
 			Serial.println(String(F("pressed: row=")) + String(row) + String(F(", col=")) + String(column));
 			#endif
-			if(millis() - lastPress >= minimumPressInterval){
 				lastPress = millis();
 				return (row ) * 4 + (column + 0);
 			}
@@ -69,8 +73,7 @@ class Mixolotron_keypad {
 		}
 	}
 
-
-	char getKeyChar(){
+	int getKeyChar(){
 		int keyCode = getKey();
 		if(keyCode == -1){
 			return -1;

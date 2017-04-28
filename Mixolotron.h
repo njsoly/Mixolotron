@@ -11,7 +11,11 @@
 #include "Mixolotron_keypad.h"
 #include "Mixolotron_serial.h"
 #include <Wire.h>
+#include <new.h>
 #include "Mixolotron_RTC.h"
+#include <stdlib.h>
+#include "Point.h"
+#include "Bounds.h"
 
 uint16_t get16BitColor(unsigned int r, unsigned int g, unsigned int b){
 	r >>= 3;
@@ -19,18 +23,6 @@ uint16_t get16BitColor(unsigned int r, unsigned int g, unsigned int b){
 	b &= 0x1f;
 	return ((r << 11) | (g << 5) | (b));
 }
-class Point {
-	public:
-	uint16_t x,y;
-	Point(uint16_t x0=0, uint16_t y0=0){
-		x = x0; 
-		y = y0;
-	}
-	/** copy constructor? */
-	Point(Point& p){
-		Point(p.x, p.y);
-	}
-};
 class TFT_GUI {
 	public:
 	TFT_GUI(unsigned int x=100, unsigned int y=150){
@@ -41,7 +33,7 @@ class TFT_GUI {
 	}
 	virtual void paintToLcd(Mixolotron_TFT& tft){
 		tft.fillRectangle(p.x,p.y,8*length, 10, 0x0222);
-		//tft.drawString(String(*yyyymmdd).c_str(), x+1, y+2, 1, 0xFFFF);
+		//tft.drawString(String((*yyyymmdd)).c_str(), x+1, y+2, 1, 0xFFFF);
 	}
 	void eraseFromLcd(Mixolotron_TFT& tft, unsigned int bg=0x000){
 		tft.fillRectangle(p.x,p.y,8*length, 10, bg);
@@ -51,65 +43,84 @@ class TFT_GUI {
 	unsigned int length = 6;
 	unsigned int bg = 0x000;
 };
-
+class Date {
+public:
+	Date(uint16_t year, uint8_t m, uint8_t d){
+		yyyy=year;
+		mm = m;
+		dd = d;
+	}
+	uint16_t yyyy;
+	uint8_t mm, dd;
+	uint16_t year(){ return yyyy; }
+	uint8_t month(){ return mm; }
+	uint8_t day(){ return dd; }
+};
 class DateEntry {
 	public:
-	String yyyymmdd = String("      ");
+	char * yyyymmdd[24];
 	
 	DateEntry(){
+	(*yyyymmdd)= "        ";
 	}
-	DateTime& getDateTime(){
-		DateTime dt(year(), month(), day());
+	Date* getDateTime(){
+		Date* dt = new Date(year(), month(), day());
 		return dt;
 	}
 	unsigned int year(){
 		unsigned int y = 0;
 		
 		for(int i = 0; i < 4; i++){
-			if(yyyymmdd[i] < '0' || yyyymmdd[i] > '9'){
+			if((*yyyymmdd)[i] < '0' || (*yyyymmdd)[i] > '9'){
 				return -1;
 			}
 			y *= 10;
-			y += (yyyymmdd[i] - '0');
+			y += ((*yyyymmdd)[i] - '0');
 		}
+		Serial.println("year of " + String(*yyyymmdd) + " is " + String(y));
 		return y;
 		
 	}
 	unsigned int month(){
 		unsigned int m = 0;
 		for(uint8_t i = 0; i < 2; i++){
-			if(yyyymmdd[i + 4] < '0' || yyyymmdd[i + 4] > '9'){
+			if((*yyyymmdd)[i + 4] < '0' || (*yyyymmdd)[i + 4] > '9'){
 				return -1;
 			}
 			m *= 10;
-			m += (yyyymmdd[i + 4] - '0');
+			m += ((*yyyymmdd)[i + 4] - '0');
 		}
 		return m;
 	}
 	unsigned int day(){
 		uint8_t d = 0;
 		for(uint8_t i = 5; i < 7; i++){
-			if(yyyymmdd[i] < '0' || yyyymmdd[i] > '9'){
+			if((*yyyymmdd)[i] < '0' || (*yyyymmdd)[i] > '9'){
 				return -1;
 			}
 			d *= 10;
-			d += (yyyymmdd[i] - '0');
+			d += ((*yyyymmdd)[i] - '0');
 		}
 		return d;
 	}
 	void paintToLcd(Mixolotron_TFT& tft){
-		tft.fillRectangle(x,y,8*length, 10, 0x0222);
-		tft.drawString(String(yyyymmdd).c_str(), x+1, y+2, 1, 0xFFFF);
+		uint8_t _sz = 2;
+		tft.fillRectangle(x,y,8*length*_sz, 10*_sz, 0x0222);
+		tft.drawString((*yyyymmdd), x+1, y+2, _sz, 0xFFFF);
 	}
 	void eraseFromLcd(Mixolotron_TFT& tft, unsigned int bg=0x000){
 		tft.fillRectangle(x,y,8*length, 10, bg);
 	}
 	void clear(){
-		yyyymmdd = "      ";
+		int i = 0; 
+		while ((*yyyymmdd)[i]){
+			(*yyyymmdd)[i] = ' ';
+			i++;
+		}
 	}
 	bool isClear(){
 		for(int i = length - 1; i >= 0; i--){
-			if(yyyymmdd[i] != ' '){
+			if((*yyyymmdd)[i] != ' '){
 				return false;
 			}
 		}
@@ -117,24 +128,24 @@ class DateEntry {
 	}
 	void backspace(){
 		if(isClear() == true)	return;
-		for(int i = length; i >= 0; i--){
-			if(yyyymmdd[i] != ' '){
-				yyyymmdd[i] = ' ';
+		for(int i = length-1; i >= 0; i--){
+			if((*yyyymmdd)[i] != ' '){
+				(*yyyymmdd)[i] = (char) ' ';
 				return;
 			}
 		}
 	}
-	void enterChar(char c){
+	void enterChar(int c){
 		for(unsigned int i = 0; i < length; i++){
-			if(yyyymmdd[i] == ' '){
-				yyyymmdd[i] = c;
+			if(((*yyyymmdd))[i] == ' '){
+				((*yyyymmdd))[i] = (char) c;
 				return;
 			}
 		}
 	}
 	protected:
-	unsigned int x=100, y=150, length = 6;	
-
+	unsigned int x=64, y=150, length = 8;	
+	
 	public:
 	Point* getPosition(){
 		return (new Point(x,y));
@@ -142,7 +153,7 @@ class DateEntry {
 	bool isFilled(){
 		char c;
 		for(unsigned int i = 0; i < length; i++){
-			c = yyyymmdd[i];
+			c = ((*yyyymmdd))[i];
 			if(c >= '0' && c <= '9'){
 				
 			}
@@ -157,7 +168,7 @@ class DateEntry {
 	}
 
 };
-enum STATE {INIT, CURRENT_DATE_ENTRY, DOB_ENTRY, WAITING_ON_PLC};
+enum STATE {INIT, CURRENT_DATE_ENTRY, DOB_ENTRY, DOB_CHECK, SIGNAL_PLC, WAITING_ON_PLC};
 class Mixolotron {
 	public:
 	Mixolotron_RTC rtc;
@@ -167,83 +178,138 @@ class Mixolotron {
 	DateEntry dob;
 	STATE state = INIT;
 	Mixolotron(){
-		
 	};
-	
+	void updateDateTime(DateTime& dt){
+		currentDate = dt;
+	}
+	void updateDateTime(){
+		currentDate = rtc.now();	
+	}
 	void loop(){
-		int k = kp.getKey();
-		if(k != -1)
+		int k = kp.getKeyChar();
+		if(k != -1){
 			keypadInput(k);
+			Serial.println("key pressed: " + String((char) k));
+		}
 		if(Serial.available() > 0){
 			serialInput();
+		}
+		if(state == DOB_ENTRY){
+			
+		}
+		if(state == SIGNAL_PLC){
+			signalPlcAndWait();
+		}
+		if(state == WAITING_ON_PLC){
+			Serial.println("waiting on plc.");
 		}
 	}
 	
 	void keypadInput(char c){
-		switch(state){
-			case DOB_ENTRY:
-				if(c == 'B'){
-					dob.backspace();
-				}
-				else if(c == 'C'){
-					dob.clear();
-				}
-				else if(c == 'A'){
-					if(dob.isFilled()){
-						check21yoa();
-					}
-				}
-				else dob.enterChar(c);
-				dob.paintToLcd(tft);
-				break;
-			default: break;
+		if(c == 'B'){
+			dob.backspace();
 		}
+		else if(c == 'C'){
+			dob.clear();
+		}
+		else if(c == 'A'){
+			if(dob.isFilled()){
+				acceptDob();
+			}
+			else {
+					Serial.println("enter full date yyyymmdd.");
+			}
+		}
+		else dob.enterChar(c);
+		
+		dob.paintToLcd(tft);
+	
 	}
 	
 	void serialInput(){
 		
 	}
-	
+	void acceptDob(){
+		state = DOB_CHECK;
+		Serial.println("dob entered: \"" + String(*dob.yyyymmdd) + "\"");
+		bool is21 = check21yoa();
+		if(is21){
+			Serial.println("user is 21.");
+			state = SIGNAL_PLC;
+		}
+		else {
+			Serial.println("user is NOT 21.");
+			dob.clear();
+			enterDob();
+		}
+		
+	}
 	virtual void init(){
-		serial.init();
+		Serial.begin(57600);
 		Wire.begin();
 		rtc.begin();
 		tft.init();
+		currentDate = rtc.now();
+	}
+	
+	void signalPlcAndWait(){
+		state = WAITING_ON_PLC;
+		Serial.println("troubles?");
+		delay(1000);
 	}
 	
 	void enterDob(){
 		state = DOB_ENTRY;
 		dob.paintToLcd(tft);
 		Point* p = dob.getPosition();
-		tft.drawString("Enter DOB:",(p->x)-16,(p->y)-10,1,0x07FF);
+		tft.drawString("Enter DOB (yyyymmdd):",(p->x)-8*4,(p->y)-10,1,0x07FF);
 		delete p;
 	}
 	
 	
 	protected:
 	bool check21yoa(){
-		
-		DateTime then = dob.getDateTime();
-		uint16_t yearDiff = currentDate->year() - then.year();
+		Serial.println("<check21yoa()>");
+		Date* then = dob.getDateTime();
+		int yearThen, yearNow;
+		yearNow = currentDate.year();
+		yearThen = then->yyyy;
+		Serial.println("yearThen: " + String(yearThen));
+		Serial.println("yearNow: " + String(yearNow));
+		if(yearThen > 3000) yearThen -= 2000;
+		int yearDiff = yearNow - yearThen;
 		if(yearDiff >= 22){
+			Serial.println("years check out: " + String(yearDiff));
+			delete then;
 			return true;
 		}
 		else if (yearDiff < 21){
+			Serial.println("years bad: " + String(yearDiff));
+			delete then;
 			return false;
 		}
-		uint16_t monthDiff = currentDate->month() - then.month();
+		uint16_t monthDiff = currentDate.month() - then->month();
 		if(monthDiff > 0){
+			delete then;
 			return true;
 		}
-		else if (monthDiff < 0)
+		else if (monthDiff < 0){
+			delete then;
 			return false;
-		uint16_t dayDiff = currentDate->day() - then.day();
-		if(dayDiff < 0)
+		}
+		uint16_t dayDiff = currentDate.day() - then->day();
+		if(dayDiff >= 0){
+			delete then;
+			return true;
+			
+		}
+		else {
+			delete then;
 			return false;
-		return true;
+		}
 	}
 	private:
-	DateTime* currentDate;
+	DateTime currentDate;
 	
 };
 
