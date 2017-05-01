@@ -168,7 +168,7 @@ class DateEntry {
 	}
 
 };
-enum STATE {INIT, CURRENT_DATE_ENTRY, DOB_ENTRY, DOB_CHECK, SIGNAL_PLC, WAITING_ON_PLC};
+enum STATE {INIT, CURRENT_DATE_ENTRY, DOB_ENTRY, DOB_CHECK, SIGNAL_PLC, WAITING_ON_PLC_1, WAITING_ON_PLC_2};
 class Mixolotron {
 	public:
 	Mixolotron_RTC rtc;
@@ -177,6 +177,7 @@ class Mixolotron {
 	Mixolotron_serial serial;
 	DateEntry dob;
 	STATE state = INIT;
+	STATE lastState = INIT;
 	Mixolotron(){
 	};
 	void updateDateTime(DateTime& dt){
@@ -195,14 +196,29 @@ class Mixolotron {
 			serialInput();
 		}
 		if(state == DOB_ENTRY){
-			
+			// print something?
 		}
 		if(state == SIGNAL_PLC){
 			signalPlcAndWait();
 		}
-		if(state == WAITING_ON_PLC){
-			Serial.println("waiting on plc.");
+		else if(state == WAITING_ON_PLC_1){
+			
+			if(state != lastState) Serial.println("waiting on plc #1");
+			if(digitalRead(PLC_PIN_IN_1) == HIGH){
+				// print "choose mixer" on display
+				state = WAITING_ON_PLC_2;
+			}
+			
 		}
+		else if(state == WAITING_ON_PLC_2){
+			if(state != lastState) Serial.println("waiting on plc #2");
+			if(digitalRead(PLC_PIN_IN_SYSREADY == HIGH)){
+				//re-write dob entry screen
+				enterDob();
+				
+			}
+		}
+		lastState = state;
 	}
 	
 	void keypadInput(char c){
@@ -250,12 +266,16 @@ class Mixolotron {
 		rtc.begin();
 		tft.init();
 		currentDate = rtc.now();
+		pinMode(PLC_PIN_OUT, OUTPUT);
+		pinMode(PLC_PIN_IN_1, INPUT);
+		pinMode(PLC_PIN_IN_SYSREADY, INPUT);
 	}
 	
 	void signalPlcAndWait(){
-		state = WAITING_ON_PLC;
-		Serial.println("troubles?");
-		delay(1000);
+		pinMode(PLC_PIN_OUT, OUTPUT);
+		digitalWrite(PLC_PIN_OUT, HIGH);
+		state = WAITING_ON_PLC_1;
+		
 	}
 	
 	void enterDob(){
