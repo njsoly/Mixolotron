@@ -394,31 +394,25 @@ class Mixolotron {
 		int yearDiff = yearNow - yearThen;
 		if(yearDiff >= 22){
 			Serial.println("years check out: " + String(yearDiff));
-			//delete then;
 			return true;
 		}
 		else if (yearDiff < 21){
 			Serial.println("years bad: " + String(yearDiff));
-			//delete then;
 			return false;
 		}
 		uint16_t monthDiff = currentDate.month() - then->month();
 		if(monthDiff > 0){
-			//delete then;
 			return true;
 		}
 		else if (monthDiff < 0){
-			//delete then;
 			return false;
 		}
 		uint16_t dayDiff = currentDate.day() - then->day();
 		if(dayDiff >= 0){
-			//delete then;
 			return true;
 			
 		}
 		else {
-			//delete then;
 			return false;
 		}
 	}
