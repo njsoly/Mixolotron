@@ -1,6 +1,12 @@
 #ifndef BOUNDS_H_
 #define BOUNDS_H_ 
 
+/** Bounds.h
+ * 
+ * by Nate Solyntjes
+ */
+
+
 #include "Point.h"
 
 class Bounds {

@@ -1,7 +1,11 @@
 #ifndef MIXOLOTRON_TFT_H_
 #define MIXOLOTRON_TFT_H_
- 
+/** Mixolotron_TFT.h 
+ * 
+ * by Nate Solyntjes
+ */
 
+ 
 #include "TFT.h"
 #include <Arduino.h>
 

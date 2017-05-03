@@ -1,4 +1,9 @@
-/* Mixolotron_EEPROM.h */
+/* Mixolotron_EEPROM.h 
+ * 
+ * by Nate Solyntjes
+ */
+
+
 #ifndef MIXOLOTRON_EEPROM_H_
 #define MIXOLOTRON_EEPROM_H_
 

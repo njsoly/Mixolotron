@@ -1,7 +1,9 @@
 #ifndef MIXOLOTRON_H_
 #define MIXOLOTRON_H_
 
-//***         Mixolotron.h         ***//
+/***         Mixolotron.h          ***
+ *        by Nate Solyntjes          *
+ ***                               ***/
 
 
 #include <Arduino.h>
@@ -11,7 +13,6 @@
 #include "Mixolotron_keypad.h"
 #include "Mixolotron_serial.h"
 #include <Wire.h>
-//#include <new.h>
 #include "Mixolotron_RTC.h"
 #include <stdlib.h>
 #include "Point.h"

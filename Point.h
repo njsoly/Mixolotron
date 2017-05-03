@@ -1,6 +1,12 @@
 #ifndef POINT_H_
 #define POINT_H_
 
+/** Point.h
+ * 
+ * by Nate Solyntjes
+ */
+
+
 class Point {
 	public:
 	uint16_t x,y;
