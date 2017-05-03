@@ -16,8 +16,9 @@
 #include "Mixolotron_RTC.h"
 #include <stdlib.h>
 #include "Point.h"
-#include "Bounds.h"
 
+/** mix color with red, green, and blue components, into a 16-bit color code
+ *  compatible with the TFT display.  */
 uint16_t get16BitColor(unsigned int r, unsigned int g, unsigned int b){
 	r >>= 3;
 	g >>= 2;
@@ -373,7 +374,6 @@ class Mixolotron {
 	void userIsNot21(){
 		Point p1(75,200);
 		Point p2(200,200+10);
-		Bounds b = Bounds(p1,p2);
 		ToastMessage not21msg("user is not 21.",p1.x, p1.y);
 		not21msg.paintToLcd(tft);
 		delay(1500);
