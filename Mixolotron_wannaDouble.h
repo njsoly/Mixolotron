@@ -1,0 +1,6 @@
+#ifndef MIXOLOTRON_WANNADOUBLE_H_
+#define MIXOLOTRON_WANNADOUBLE_H_
+
+#include "Mixolotron.h"
+
+#endif /* MIXOLOTRON_WANNADOUBLE_H_ */

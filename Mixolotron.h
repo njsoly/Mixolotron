@@ -1,10 +1,8 @@
 #ifndef MIXOLOTRON_H_
 #define MIXOLOTRON_H_
-
 /***         Mixolotron.h          ***
  *        by Nate Solyntjes          *
  ***                               ***/
-
 
 #include <Arduino.h>
 #include <stdint.h>
@@ -33,9 +31,18 @@ class ToastMessage {
 		p = Point(x,y);
 		p2 = Point(x+150, y+10);
 	}
+	uint16_t strlen(char* s){
+		uint16_t len = 0;
+		char *c = s[len];
+		while(c){
+			len++;
+			c = s[len];
+		}
+		return len;
+	}
 	void paintToLcd(Mixolotron_TFT& tft){
 		tft.drawString(msg, p.x+1, p.y+1, 1, 0xffff);
-		tft.drawRectangle(p.x,p.y,p2.x-p.x,p2.y-p.y,get16BitColor(0,255,255));
+		tft.drawRectangle(p.x,p.y,strlen(msg)*8,p2.y-p.y,get16BitColor(0,255,255));
 	}
 	void eraseFromLcd(Mixolotron_TFT& tft, unsigned int bg=0x000){
 		tft.fillRectangle(p.x, p.y, (p2.x-p.x)+2, (p2.y - p.y)+2, bg);
@@ -107,7 +114,7 @@ class DateEntry {
 	}
 	void paintToLcd(Mixolotron_TFT& tft){
 		uint8_t _textsize = 2;
-		tft.fillRectangle(x-37,y,8*length*_textsize,10*_textsize,0x000);
+		tft.fillRectangle(x-37,y,8*length*_textsize+24,10*_textsize*2,0x000);
 		tft.fillRectangle(x,y,8*length*_textsize, 10*_textsize, 0x0222);
 		tft.drawString((*yyyymmdd), x+1, y+2, _textsize, 0xFFFF);
 		tft.drawRectangle(x,y,8*length*_textsize, 10*_textsize, 0x7777);
@@ -173,7 +180,8 @@ class DateEntry {
 	}
 
 };
-enum STATE {INIT, CURRENT_DATE_ENTRY, DOB_ENTRY, DOB_CHECK, NOT_21, SIGNAL_PLC, WAITING_ON_PLC_1, WAITING_ON_PLC_2};
+enum STATE {INIT, CURRENT_DATE_ENTRY, DOB_ENTRY, DOB_CHECK, NOT_21, SIGNAL_PLC, 
+	WAITING_ON_PLC_0, WAITING_ON_PLC_1, WAITING_ON_PLC_2};
 class Mixolotron {
 	public:
 	Mixolotron_RTC rtc;
@@ -200,6 +208,9 @@ class Mixolotron {
 		}
 		else if(state == NOT_21){
 			s += "NOT_21";
+		}
+		else if(state == WAITING_ON_PLC_0){
+			s += "WAITING_ON_PLC_0";
 		}
 		else if(state == WAITING_ON_PLC_1){
 			s += "WAITING_ON_PLC_1";
@@ -241,6 +252,28 @@ class Mixolotron {
 			signalPlcAndWait();
 			return;
 		}
+		else if(state == WAITING_ON_PLC_0){
+			
+			if(state != lastState) Serial.println("waiting on plc #0");
+			if (digitalRead(PLC_PIN_IN_0) != HIGH){
+				Serial.println("pin in 0 is not HIGH");
+			}
+			else {
+				// signal has changed, now see if it stays
+				int debounceCt = 0;
+				int debounceDelayMs = 10;
+				while(digitalRead(PLC_PIN_IN_0) == HIGH){
+					debounceCt++;
+					delay(debounceDelayMs);
+					Serial.println("debounce counter: " + String(debounceCt));
+					if(debounceCt == 50){
+							state = WAITING_ON_PLC_1;
+						printChoiceMsg1();
+						 break;
+					}
+				}
+			}
+		}
 		else if(state == WAITING_ON_PLC_1){
 			
 			if(state != lastState) Serial.println("waiting on plc #1");
@@ -267,7 +300,7 @@ class Mixolotron {
 			if(state != lastState) Serial.println("waiting on plc #2");
 			pinMode(PLC_PIN_IN_SYSREADY, INPUT);
 			if(digitalRead(PLC_PIN_IN_SYSREADY) != HIGH){
-				Serial.println("pin in sysready is HIGH");
+				Serial.println("pin in sysready is not HIGH");
 			}
 			else {
 				
@@ -344,6 +377,7 @@ class Mixolotron {
 		tft.init();
 		currentDate = rtc.now();
 		pinMode(PLC_PIN_OUT, OUTPUT);
+		pinMode(PLC_PIN_IN_0, INPUT);
 		pinMode(PLC_PIN_IN_1, INPUT);
 		pinMode(PLC_PIN_IN_SYSREADY, INPUT);
 	}
@@ -351,11 +385,18 @@ class Mixolotron {
 	void signalPlcAndWait(){
 		pinMode(PLC_PIN_OUT, OUTPUT);
 		digitalWrite(PLC_PIN_OUT, HIGH);
-		state = WAITING_ON_PLC_1;
-		printChoiceMsg1();
+		state = WAITING_ON_PLC_0;
+		printChoiceMsg0();
+	}
+	void printChoiceMsg0(){
+		dob.eraseFromLcd(tft);
+		ToastMessage pick0("would you like a double?",28,150);
+		pick0.paintToLcd(tft);
+		
 	}
 	void printChoiceMsg1(){
 		dob.eraseFromLcd(tft);
+		tft.fillRectangle(28, 150, 200, 20, 0x000);
 		ToastMessage pick1("choose alcohol type", 28, 150);
 		pick1.paintToLcd(tft);
 	}
